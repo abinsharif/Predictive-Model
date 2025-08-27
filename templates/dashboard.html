@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Predictive Modeling Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="display-4 mb-4">
+            <i class="fas fa-globe-americas text-primary me-3"></i>
+            Comprehensive Predictive Modeling Platform
+        </h1>
+        <p class="lead">Advanced scenario analysis covering military conflicts, economic warfare, population dynamics, and global response modeling.</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ total_countries }}</h4>
+                        <p class="mb-0">Countries</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-flag fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ total_models }}</h4>
+                        <p class="mb-0">Analysis Models</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-brain fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>6</h4>
+                        <p class="mb-0">Built-in Experiments</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-flask fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ recent_scenarios|length }}</h4>
+                        <p class="mb-0">Recent Scenarios</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feature Overview -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-crosshairs me-2"></i>Military Analysis</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Missile trajectory calculations</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Casualty estimation models</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Defense system effectiveness</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Nuclear warfare modeling</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Escalation probability analysis</li>
+                </ul>
+                <a href="{{ url_for('scenario_builder') }}" class="btn btn-primary">Create Military Scenario</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Economic Modeling</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Economic warfare impact</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Supply chain disruption</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Market volatility modeling</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>GDP impact calculations</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Recovery timeline analysis</li>
+                </ul>
+                <a href="{{ url_for('scenario_builder') }}" class="btn btn-success">Create Economic Scenario</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Population & Social Dynamics</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Demographic impact analysis</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Displacement modeling</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Psychological trauma assessment</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Social cohesion analysis</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Cultural impact evaluation</li>
+                </ul>
+                <a href="{{ url_for('scenario_builder') }}" class="btn btn-info">Analyze Population Impact</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0"><i class="fas fa-robot me-2"></i>AI Assistant</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Natural language scenario building</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Intelligent parameter suggestion</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Automated analysis execution</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Results interpretation</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Context-aware recommendations</li>
+                </ul>
+                <a href="{{ url_for('ai_assistant_page') }}" class="btn btn-warning">Chat with AI Assistant</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Scenarios -->
+{% if recent_scenarios %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Scenarios</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Scenario ID</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for scenario in recent_scenarios %}
+                            <tr>
+                                <td><code>{{ scenario.id[:8] }}...</code></td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ scenario.type }}</span>
+                                </td>
+                                <td>
+                                    {% if scenario.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif scenario.status == 'running' %}
+                                        <span class="badge bg-primary">Running</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">{{ scenario.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ scenario.created_at }}</td>
+                                <td>
+                                    {% if scenario.status == 'completed' %}
+                                        <a href="{{ url_for('results_viewer', scenario_id=scenario.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>View Results
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Start Guide -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-play-circle me-2"></i>Quick Start Guide</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-plus-circle fa-3x text-primary mb-2"></i>
+                            <h6>1. Create Scenario</h6>
+                            <p class="small">Use the Scenario Builder or AI Assistant to create a new analysis scenario.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-cog fa-3x text-success mb-2"></i>
+                            <h6>2. Configure Parameters</h6>
+                            <p class="small">Set population size, geographic location, intensity levels, and other parameters.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-play fa-3x text-info mb-2"></i>
+                            <h6>3. Run Analysis</h6>
+                            <p class="small">Execute comprehensive analysis using multiple interconnected models.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-pie fa-3x text-warning mb-2"></i>
+                            <h6>4. View Results</h6>
+                            <p class="small">Explore detailed results with 3D visualizations and interactive charts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

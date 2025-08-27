@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Models Overview</h2>
+    <hr>
+    {% if models %}
+        <div class="row">
+            {% for key, model in models.items() %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ model.name }}</h5>
+                        <p class="card-text">{{ model.description }}</p>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Complexity:</strong> {{ model.complexity }}</li>
+                            <li class="list-group-item"><strong>Estimated Runtime:</strong> {{ model.runtime_seconds[0] }}-{{ model.runtime_seconds[1] }} seconds</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No model information available.</p>
+    {% endif %}
+</div>
+{% endblock %}

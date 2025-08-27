@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Built-in Experiments</h2>
+    <hr>
+    {% if experiments %}
+        <div class="row">
+            {% for key, exp in experiments.items() %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ exp.name }}</h5>
+                        <p class="card-text">{{ exp.description }}</p>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Complexity:</strong> {{ exp.complexity }}</li>
+                            <li class="list-group-item"><strong>Estimated Runtime:</strong> {{ exp.estimated_runtime }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No experiments available.</p>
+    {% endif %}
+</div>
+{% endblock %}

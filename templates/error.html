@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Error - Predictive Modeling Platform{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="text-center">
+            <i class="fas fa-exclamation-triangle fa-5x text-warning mb-4"></i>
+            <h1 class="display-4 mb-3">Oops!</h1>
+            <p class="lead mb-4">{{ error }}</p>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

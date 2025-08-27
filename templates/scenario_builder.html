@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Scenario Builder - Predictive Modeling Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-cogs text-primary me-3"></i>
+            Advanced Scenario Builder
+        </h1>
+        <p class="lead">Create complex predictive modeling scenarios with detailed parameter configuration.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Scenario Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form id="scenarioForm">
+                    <!-- Scenario Type -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Scenario Type</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="scenario_type" id="military" value="military" checked>
+                                <label class="btn btn-outline-danger w-100" for="military">
+                                    <i class="fas fa-crosshairs me-2"></i>Military Conflict
+                                </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="scenario_type" id="economic" value="economic">
+                                <label class="btn btn-outline-success w-100" for="economic">
+                                    <i class="fas fa-chart-line me-2"></i>Economic Warfare
+                                </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="scenario_type" id="climate" value="climate">
+                                <label class="btn btn-outline-info w-100" for="climate">
+                                    <i class="fas fa-globe me-2"></i>Climate Impact
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Countries Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Countries Involved</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="attacker_country" class="form-label">Primary Actor</label>
+                                <select class="form-select" id="attacker_country" name="attacker_country">
+                                    <option value="">Select country...</option>
+                                    {% for country in countries %}
+                                    <option value="{{ country }}">{{ country }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="target_country" class="form-label">Target/Affected</label>
+                                <select class="form-select" id="target_country" name="target_country">
+                                    <option value="">Select country...</option>
+                                    {% for country in countries %}
+                                    <option value="{{ country }}">{{ country }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Environment Configuration -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Environment Configuration</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="environment_type" class="form-label">Environment Scale</label>
+                                <select class="form-select" id="environment_type" name="environment_type">
+                                    {% for env_type, env_data in environment_types.items() %}
+                                    <option value="{{ env_type }}">{{ env_data.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="population_size" class="form-label">Population Size</label>
+                                <input type="number" class="form-control" id="population_size" name="population_size" 
+                                       value="1000000" min="1000" max="2000000000">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="terrain_type" class="form-label">Terrain Type</label>
+                                <select class="form-select" id="terrain_type" name="terrain_type">
+                                    <option value="urban_medium">Urban Medium</option>
+                                    <option value="urban_dense">Urban Dense</option>
+                                    <option value="rural_agricultural">Rural Agricultural</option>
+                                    <option value="mountainous">Mountainous</option>
+                                    <option value="coastal">Coastal</option>
+                                    <option value="desert">Desert</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scenario Parameters -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Scenario Parameters</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="intensity" class="form-label">Intensity Level</label>
+                                <select class="form-select" id="intensity" name="intensity">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="extreme">Extreme</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="duration_days" class="form-label">Duration (Days)</label>
+                                <input type="number" class="form-control" id="duration_days" name="duration_days" 
+                                       value="30" min="1" max="3650">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="escalation_level" class="form-label">Escalation Level</label>
+                                <select class="form-select" id="escalation_level" name="escalation_level">
+                                    <option value="limited">Limited</option>
+                                    <option value="tactical">Tactical</option>
+                                    <option value="strategic">Strategic</option>
+                                    <option value="all_out">All Out</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Options -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Advanced Options</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="nuclear_escalation" name="nuclear_escalation">
+                                    <label class="form-check-label" for="nuclear_escalation">
+                                        Nuclear Escalation Risk
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="supply_chain_impact" name="supply_chain_impact">
+                                    <label class="form-check-label" for="supply_chain_impact">
+                                        Supply Chain Impact
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="climate_effects" name="climate_effects">
+                                    <label class="form-check-label" for="climate_effects">
+                                        Climate Effects
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Analysis Models to Run</label>
+                        <div class="row">
+                            {% for model_type in model_types %}
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="model_{{ model_type }}" 
+                                           name="models" value="{{ model_type }}" checked>
+                                    <label class="form-check-label" for="model_{{ model_type }}">
+                                        {{ model_type.replace('_', ' ').title() }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-outline-secondary me-md-2" onclick="resetForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                        <button type="button" class="btn btn-success me-md-2" onclick="saveScenario()">
+                            <i class="fas fa-save me-2"></i>Save Scenario
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="runAnalysis()">
+                            <i class="fas fa-play me-2"></i>Run Analysis
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Model Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Model Information</h6>
+            </div>
+            <div class="card-body">
+                <div id="model-info">
+                    <p class="text-muted">Select a model to see detailed information.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Environment Presets -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-layer-group me-2"></i>Environment Presets</h6>
+            </div>
+            <div class="card-body">
+                <div class="btn-group-vertical w-100" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadPreset('urban_conflict')">
+                        Urban Conflict
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="loadPreset('rural_disaster')">
+                        Rural Disaster
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-sm" onclick="loadPreset('economic_crisis')">
+                        Economic Crisis
+                    </button>
+                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="loadPreset('global_pandemic')">
+                        Global Pandemic
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estimated Runtime -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Estimated Runtime</h6>
+            </div>
+            <div class="card-body">
+                <div id="runtime-estimate">
+                    <p class="text-center">
+                        <span class="badge bg-primary fs-6">45-90 seconds</span>
+                    </p>
+                    <small class="text-muted">
+                        Runtime depends on complexity and number of models selected.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Modal -->
+<div class="modal fade" id="analysisModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Running Analysis</h5>
+            </div>
+            <div class="modal-body">
+                <div class="progress mb-3">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%" id="analysisProgress"></div>
+                </div>
+                <p id="analysisStatus">Initializing analysis...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/scenario_builder.js') }}"></script>
+{% endblock %}
