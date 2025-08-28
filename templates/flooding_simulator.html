@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Flooding Simulator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3"><i class="fas fa-water"></i> Water Flooding Impact Simulator</h2>
+    <form id="floodingForm" class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="islandProfile" class="form-label">Island Profile</label>
+                <select class="form-select" id="islandProfile" name="island_profile" required>
+                    {% for key, profile in island_profiles.items() %}
+                    <option value="{{ key }}">{{ key | replace('_', ' ') | title }} - {{ profile.description }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Please select an island profile.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="waterReleaseSpeed" class="form-label">Water Release Speed</label>
+                <select class="form-select" id="waterReleaseSpeed" name="water_release_speed" required>
+                    <option value="very_fast">Very Fast (1 minute)</option>
+                    <option value="fast" selected>Fast (1 hour)</option>
+                    <option value="medium">Medium (6 hours)</option>
+                    <option value="slow">Slow (1 day)</option>
+                    <option value="very_slow">Very Slow (1 week)</option>
+                </select>
+                <div class="invalid-feedback">Please select release speed.</div>
+            </div>
+        </div>
+
+        <!-- Advanced Settings Accordion -->
+        <div class="accordion mb-3" id="advancedSettings">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        Advanced Settings
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#advancedSettings">
+                    <div class="accordion-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="waterVolumeMultiplier" class="form-label">Water Volume Multiplier</label>
+                                <input type="range" class="form-range" min="0.1" max="3" step="0.1" id="waterVolumeMultiplier" name="water_volume_multiplier" value="1">
+                                <small class="form-text text-muted">Scale relative to island volume above sea level.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fSeismic" class="form-label">Fraction to Seismic Energy (f_seismic)</label>
+                                <input type="number" class="form-control" id="fSeismic" name="advanced_parameters[f_seismic]" value="0.001" step="0.0001" min="0" max="0.05">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fAir" class="form-label">Fraction to Air Kinetic (f_air)</label>
+                                <input type="number" class="form-control" id="fAir" name="advanced_parameters[f_air]" value="0.005" step="0.0005" min="0" max="0.05">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit"><i class="fas fa-play"></i> Run Analysis</button>
+    </form>
+
+    <div id="loadingSpinner" class="text-center mt-4" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Running flooding analysis. Please wait...</p>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict'
+    var form = document.getElementById('floodingForm');
+    form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+            event.preventDefault();
+            runFloodingAnalysis();
+        }
+        form.classList.add('was-validated');
+    }, false);
+})();
+
+function runFloodingAnalysis() {
+    const spinner = document.getElementById('loadingSpinner');
+    spinner.style.display = 'block';
+
+    const data = Object.fromEntries(new FormData(document.getElementById('floodingForm')).entries());
+    fetch('/api/run-flooding-scenario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(res => res.json()).then(response => {
+        spinner.style.display = 'none';
+        if (response.status === 'success') {
+            window.location.href = `/flooding-results/${response.scenario_id}`;
+        } else {
+            alert(response.error || 'Failed to start flooding analysis');
+        }
+    }).catch(err => {
+        spinner.style.display = 'none';
+        alert('Error: ' + err);
+    });
+}
+</script>
+{% endblock %}

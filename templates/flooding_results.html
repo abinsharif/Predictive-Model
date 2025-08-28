@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Flooding Results - {{ scenario_id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="fas fa-water"></i> Flooding Analysis Results</h2>
+    <div class="mb-3">
+        <strong>Scenario ID:</strong> {{ scenario_id }}<br>
+        <strong>Island Profile:</strong> {{ config.get('island_profile', 'custom') | replace('_', ' ') | title }}<br>
+        <strong>Water Release Speed:</strong> {{ config.get('water_release_speed', 'fast') | replace('_', ' ') | title }}<br>
+        <strong>Created:</strong> {{ created_at }}<br>
+        <strong>Completed:</strong> {{ completed_at }}
+    </div>
+
+    <h4>Key Impact Metrics</h4>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Immediate Casualties</h5>
+                    <p class="display-6 text-danger">{{ flooding_data.casualty_analysis.immediate_casualties | default(0) | int }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Displacement Estimate</h5>
+                    <p class="display-6 text-warning">{{ flooding_data.casualty_analysis.displacement_estimate | default(0) | int }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Farmland Destroyed</h5>
+                    <p class="display-6 text-success">{{ flooding_data.environmental_impact.farmland_destroyed_percent | default(0) }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="mt-4">Detailed Analyses</h4>
+    <div class="accordion" id="resultsAccordion">
+        {% for key, section in flooding_data.items() %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ loop.index }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
+                    {{ key | replace('_', ' ') | title }}
+                </button>
+            </h2>
+            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#resultsAccordion">
+                <div class="accordion-body">
+                    <pre class="small bg-light p-3">{{ section | tojson(indent=2) }}</pre>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-4"><i class="fas fa-home"></i> Back to Dashboard</a>
+</div>
+{% endblock %}

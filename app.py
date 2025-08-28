@@ -1,7 +1,4 @@
 import os
-def log_error_to_file(error_message):
-    with open(os.path.join(os.path.dirname(__file__), 'error.log'), 'a', encoding='utf-8') as f:
-        f.write(error_message + '\n')
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from datetime import datetime, timedelta
 import sqlite3
@@ -16,18 +13,184 @@ from models.composite_models import CompositeScenarioModel
 from utils.data_manager import DataManager, CountryDataManager, ScenarioManager
 from utils.visualization_engine import VisualizationEngine
 from ai_assistant.chat_assistant import AIAssistant
+from models.flooding_models import WaterFloodingModel
 from ai_config import OPENAI_API_KEY, AI_PROVIDER
 
 app = Flask(__name__)
 app.config.from_object('config.DevelopmentConfig')
+
+def log_error_to_file(error_message):
+    with open(os.path.join(os.path.dirname(__file__), 'error.log'), 'a', encoding='utf-8') as f:
+        f.write(error_message + '\n')
 
 # Initialize managers
 data_manager = DataManager()
 country_manager = CountryDataManager()
 scenario_manager = ScenarioManager()
 visualization_engine = VisualizationEngine()
-composite_model = CompositeScenarioModel()
 ai_assistant = AIAssistant()
+composite_model = CompositeScenarioModel()
+flooding_model = WaterFloodingModel()
+ai_assistant = AIAssistant()
+# ...existing code...
+
+# Flooding simulator page
+@app.route('/flooding-simulator')
+def flooding_simulator():
+    """Flooding simulator page"""
+    try:
+        island_profiles = flooding_model.island_profiles
+        return render_template('flooding_simulator.html', 
+                             island_profiles=island_profiles)
+    except Exception as e:
+        app.logger.error(f"Flooding simulator error: {str(e)}")
+        flash('Error loading flooding simulator', 'error')
+        return redirect(url_for('dashboard'))
+
+# API route for running flooding scenarios
+@app.route('/api/run-flooding-scenario', methods=['POST'])
+def run_flooding_scenario():
+    """Start flooding scenario analysis"""
+    try:
+        scenario_data = request.get_json()
+        if not scenario_data:
+            return jsonify({'error': 'No scenario data provided'}), 400
+        scenario_data['type'] = 'flooding'
+        scenario_config_str = json.dumps(scenario_data, sort_keys=True)
+        scenario_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, scenario_config_str))
+        scenario_data['scenario_id'] = scenario_id
+        conn = get_db()
+        existing = conn.execute('SELECT id FROM scenarios WHERE id = ?', (scenario_id,)).fetchone()
+        if existing:
+            return jsonify({
+                'status': 'success',
+                'scenario_id': scenario_id,
+                'message': 'Using existing analysis results'
+            })
+        conn.execute(
+            'INSERT INTO scenarios (id, config, status, created_at) VALUES (?, ?, ?, ?)',
+            (scenario_id, json.dumps(scenario_data), 'initialized', datetime.now().isoformat())
+        )
+        conn.commit()
+        conn.close()
+        analysis_thread = threading.Thread(
+            target=run_flooding_analysis,
+            args=(scenario_id, scenario_data)
+        )
+        analysis_thread.daemon = True
+        analysis_thread.start()
+        active_analyses[scenario_id] = {
+            'status': 'running',
+            'progress': 0,
+            'current_phase': 'initialization',
+            'started_at': datetime.now()
+        }
+        return jsonify({
+            'status': 'success',
+            'scenario_id': scenario_id,
+            'message': 'Flooding analysis started successfully'
+        })
+    except Exception as e:
+        app.logger.error(f"Run flooding scenario error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+def run_flooding_analysis(scenario_id, scenario_data):
+    """Run flooding analysis in background thread"""
+    try:
+        update_scenario_status(scenario_id, 'running', 10, 'Starting flooding analysis')
+        update_scenario_status(scenario_id, 'running', 30, 'Running flooding calculations')
+        results = flooding_model.calculate_water_impact_scenario(scenario_data)
+        update_scenario_status(scenario_id, 'running', 80, 'Saving flooding results')
+        conn = get_db()
+        conn.execute('''
+            INSERT INTO flooding_analysis 
+            (scenario_id, island_profile, water_release_speed, geometry_data, 
+             energy_analysis, flow_analysis, pressure_analysis, tsunami_effects,
+             seismic_effects, landslide_analysis, weather_effects, casualty_analysis,
+             environmental_impact, timeline_projections, confidence_analysis)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            scenario_id,
+            scenario_data.get('island_profile', 'custom'),
+            scenario_data.get('water_release_speed', 'fast'),
+            json.dumps(results.get('basic_geometry', {})),
+            json.dumps(results.get('energy_analysis', {})),
+            json.dumps(results.get('flow_analysis', {})),
+            json.dumps(results.get('pressure_analysis', {})),
+            json.dumps(results.get('tsunami_effects', {})),
+            json.dumps(results.get('seismic_effects', {})),
+            json.dumps(results.get('landslide_analysis', {})),
+            json.dumps(results.get('weather_effects', {})),
+            json.dumps(results.get('casualty_analysis', {})),
+            json.dumps(results.get('environmental_impact', {})),
+            json.dumps(results.get('timeline_projections', {})),
+            json.dumps(results.get('confidence_analysis', {}))
+        ))
+        conn.execute(
+            'UPDATE scenarios SET results = ?, status = ?, completed_at = ? WHERE id = ?',
+            (json.dumps(results), 'completed', datetime.now().isoformat(), scenario_id)
+        )
+        conn.commit()
+        conn.close()
+        update_scenario_status(scenario_id, 'completed', 100, 'Flooding analysis completed')
+        if scenario_id in active_analyses:
+            del active_analyses[scenario_id]
+    except Exception as e:
+        app.logger.error(f"Flooding analysis error for {scenario_id}: {str(e)}")
+        update_scenario_status(scenario_id, 'error', 0, f'Error: {str(e)}')
+        if scenario_id in active_analyses:
+            del active_analyses[scenario_id]
+
+# Flooding results viewer page
+@app.route('/flooding-results/<scenario_id>')
+def flooding_results_viewer(scenario_id):
+    """Flooding results viewer page"""
+    try:
+        conn = get_db()
+        result = conn.execute(
+            'SELECT config, results, status, created_at, completed_at FROM scenarios WHERE id = ?',
+            (scenario_id,)
+        ).fetchone()
+        flooding_result = conn.execute(
+            'SELECT * FROM flooding_analysis WHERE scenario_id = ?',
+            (scenario_id,)
+        ).fetchone()
+        conn.close()
+        if not result:
+            flash('Flooding scenario not found', 'error')
+            return redirect(url_for('dashboard'))
+        if result['status'] != 'completed':
+            flash('Flooding analysis not completed', 'warning')
+            return redirect(url_for('dashboard'))
+        config = json.loads(result['config']) if result['config'] else {}
+        results = json.loads(result['results']) if result['results'] else {}
+        flooding_data = {}
+        if flooding_result:
+            flooding_data = {
+                'geometry_data': json.loads(flooding_result['geometry_data']) if flooding_result['geometry_data'] else {},
+                'energy_analysis': json.loads(flooding_result['energy_analysis']) if flooding_result['energy_analysis'] else {},
+                'flow_analysis': json.loads(flooding_result['flow_analysis']) if flooding_result['flow_analysis'] else {},
+                'pressure_analysis': json.loads(flooding_result['pressure_analysis']) if flooding_result['pressure_analysis'] else {},
+                'tsunami_effects': json.loads(flooding_result['tsunami_effects']) if flooding_result['tsunami_effects'] else {},
+                'seismic_effects': json.loads(flooding_result['seismic_effects']) if flooding_result['seismic_effects'] else {},
+                'landslide_analysis': json.loads(flooding_result['landslide_analysis']) if flooding_result['landslide_analysis'] else {},
+                'weather_effects': json.loads(flooding_result['weather_effects']) if flooding_result['weather_effects'] else {},
+                'casualty_analysis': json.loads(flooding_result['casualty_analysis']) if flooding_result['casualty_analysis'] else {},
+                'environmental_impact': json.loads(flooding_result['environmental_impact']) if flooding_result['environmental_impact'] else {},
+                'timeline_projections': json.loads(flooding_result['timeline_projections']) if flooding_result['timeline_projections'] else {},
+                'confidence_analysis': json.loads(flooding_result['confidence_analysis']) if flooding_result['confidence_analysis'] else {}
+            }
+        return render_template('flooding_results.html',
+                             scenario_id=scenario_id,
+                             config=config,
+                             results=results,
+                             flooding_data=flooding_data,
+                             created_at=result['created_at'],
+                             completed_at=result['completed_at'])
+    except Exception as e:
+        app.logger.error(f"Flooding results viewer error: {str(e)}")
+        flash('Error loading flooding results', 'error')
+        return redirect(url_for('dashboard'))
 
 # Thread-safe queue for long-running analyses
 analysis_queue = queue.Queue()
